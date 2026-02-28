@@ -1,16 +1,14 @@
-{
-  "name": "whatsapp-bot",
-  "version": "1.0.0",
-  "description": "WhatsApp Bot with Always Online",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "@whiskeysockets/baileys": "^6.5.0",
-    "qrcode-terminal": "^0.12.0",
-    "pino": "^8.17.2",
-    "dotenv": "^16.3.1",
-    "node-fetch": "^2.7.0"
-  }
+export async function before(m) {
+    const chat = global.db.data.chats[m.chat];
+    if (!chat?.autotype) return;
+  
+    const commands = Object.values(global.plugins || {}).flatMap((plugin) => [].concat(plugin.command || []));
+    const presenceStatus = commands.some((cmd) => (cmd instanceof RegExp ? cmd.test(m.text) : m.text?.includes(cmd))) ? 'composing' : 'available';
+  
+    if (presenceStatus) {
+        await this.sendPresenceUpdate(presenceStatus, m.chat);
+        console.log(`👤 Presence updated: ${presenceStatus} in ${m.chat}`);
+    }
 }
+
+export const disabled = false;
